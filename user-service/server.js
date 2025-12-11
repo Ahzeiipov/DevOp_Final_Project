@@ -1,13 +1,26 @@
-const app = require('./app');
-const port = process.env.PORT || 3001;
-const mongoose = require('mongoose');
+const express = require("express");
+const mongoose = require("mongoose");
+const userRoutes = require("./routes/userRoutes");
 
-const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/user_db';
+const app = express();
+app.use(express.json());
 
-mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+// Health check
+app.get('/', (req, res) => res.send('User Service OK'));
+
+app.use('/users', userRoutes);
+
+const mongoUrl = process.env.MONGO_URL || "mongodb+srv://mayfive123456_db_user:w68rT8OJdtHaVy8H@cluster0.ppfzcje.mongodb.net/user_db?retryWrites=true&w=majority";
+
+mongoose.connect(mongoUrl, {
+  serverSelectionTimeoutMS: 5000
+})
   .then(() => {
-    console.log('User DB connected');
-    app.listen(port, () => console.log(`User service listening ${port}`));
-  }).catch(err => {
-    console.error('DB connection error', err);
+    console.log("User DB connected on Atlas");
+    const port = process.env.PORT || 3001;
+    app.listen(port, () => console.log(`User Service running on port ${port}`));
+  })
+  .catch(err => {
+    console.log("DB connection error:", err.message);
+    process.exit(1);
   });
